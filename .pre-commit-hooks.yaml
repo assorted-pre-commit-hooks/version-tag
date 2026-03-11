@@ -1,0 +1,8 @@
+- id: version-tag
+  name: version-tag
+  entry: ./version-tag
+  stages: [post-commit]
+  always_run: true
+  require_serial: true
+  pass_filenames: false
+  language: unsupported_script

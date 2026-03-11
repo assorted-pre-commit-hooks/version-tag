@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# fail on errors
+set -e
+
+# default parameters
+subject_prefix="Version"
+tag_prefix="v"
+git_tag_options="-a"
+
+# parse options
+while [ "X$1" != X ]; do
+    case $1 in
+        --subject-prefix)
+            shift
+            subject_prefix="$1"
+            ;;
+        --tag-prefix)
+            shift
+            tag_prefix="$1"
+            ;;
+        --git-tag-options)
+            shift
+            git_tag_options="$1"
+            ;;
+        *)
+            echo "ERROR: unknown option '$1'" >&2
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+# get subject line of last commit
+subject=`git log -n 1 --pretty="format:%s"`
+
+# extract version number from subject line
+version="${subject##${subject_prefix}}"
+
+# if $subject and $version are the same, commit was not a version commit
+if [ "x${subject}" = "x${version}" ]; then
+    exit 0
+fi
+
+# strip whitespace
+version=`echo ${version}`
+
+# create version tag name
+version_tag="${tag_prefix}${version}"
+
+# delete any existing version tag
+git tag -d ${version_tag} >/dev/null 2>&1 || true
+
+# create version tag
+git tag ${git_tag_options} -m "${subject}" "${version_tag}"
